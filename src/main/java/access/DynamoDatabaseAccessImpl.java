@@ -20,6 +20,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 
 import database.dynamo.Constants;
+import logs.LogWriter;
 
 public class DynamoDatabaseAccessImpl implements DynamoDatabaseAccess {
 	
@@ -48,8 +49,8 @@ public class DynamoDatabaseAccessImpl implements DynamoDatabaseAccess {
             		.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(Constants.LOCAL_HOST + ":" + Constants.DATABASE_PORT, Constants.DATABASE_REGION)).build();
         } catch (Exception e) {
         	connectSucess = false;
-        	System.out.println("Cannot load the credentials from the credential profiles file, check the value elements un credentials file");
-        	System.out.println(e);
+        	LogWriter.writeLog("Cannot load the credentials from the credential profiles file, check the value elements un credentials file");
+        	LogWriter.writeLog(e.toString());
         }
         
         return connectSucess;
@@ -67,8 +68,8 @@ public class DynamoDatabaseAccessImpl implements DynamoDatabaseAccess {
 			        .withProvisionedThroughput(new ProvisionedThroughput().withReadCapacityUnits(1L).withWriteCapacityUnits(1L));
 		} catch (Exception e) {
 			sucess = false;
-        	System.out.println("Error creating table " + tableName);
-        	System.out.println(e);
+        	LogWriter.writeLog("Error creating table " + tableName);
+        	LogWriter.writeLog(e.toString());
 		}
 		return sucess;
 	}

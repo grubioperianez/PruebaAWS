@@ -1,5 +1,6 @@
 package com.amazonaws.samples;
 import access.DynamoDatabaseAccessImpl;
+import logs.LogWriter;
 
 /**
  * This sample demonstrates how to perform a few simple operations with the
@@ -11,18 +12,18 @@ public class AmazonDynamoDBSample {
 
     public static void main(String[] args) throws Exception {
     	
-    	System.out.println("Class constructor");
+    	LogWriter.writeLog("Class constructor");
     	DynamoDatabaseAccessImpl dynamoDatabaseAccessImpl = new DynamoDatabaseAccessImpl();
     	
     	
-    	System.out.println("Initialize connection");
+    	LogWriter.writeLog("Initialize connection");
     	boolean sucessInitialDatabaseConnection = dynamoDatabaseAccessImpl.initConnexion();
     	
     	if (sucessInitialDatabaseConnection) {
     		String descriptionTable = dynamoDatabaseAccessImpl.describeTable("Prueba001");
-    		System.out.println(descriptionTable);
+    		LogWriter.writeLog(descriptionTable);
     	} else {
-    		System.out.println("Failure to initialice the database connection");
+    		LogWriter.writeLog("Failure to initialice the database connection");
     	}
     	
     	
