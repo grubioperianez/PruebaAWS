@@ -1,8 +1,11 @@
 package access;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +13,9 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
@@ -23,6 +29,12 @@ import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
 import com.amazonaws.services.dynamodbv2.model.PutItemResult;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import database.dynamo.Constants;
 import logs.LogWriter;
@@ -79,6 +91,82 @@ public class DynamoDatabaseAccessImpl implements DynamoDatabaseAccess {
 		}
 		return sucess;
 	}
+	
+	
+	
+	
+	public boolean createTableMovies(String tableName) {
+		
+		boolean sucess = true;
+		
+        try {
+            System.out.println("Attempting to create table; please wait...");
+            CreateTableResult table = dynamoDB.createTable(
+            			// 2 fields type string (ScalarAttributeType.S)
+            			Arrays.asList(new AttributeDefinition("year", ScalarAttributeType.N), new AttributeDefinition("title", ScalarAttributeType.S)),
+            			//Arrays.asList( new AttributeDefinition(KeyName, ScalarAttributeType.N) ),
+            			tableName,
+            			// Partition // key
+            			Arrays.asList(new KeySchemaElement("year", KeyType.HASH),new KeySchemaElement("title", KeyType.RANGE)), // Sort key                
+            			//Arrays.asList( new KeySchemaElement(KeyName, KeyType.HASH) ), // Sort key
+            			new ProvisionedThroughput(10L, 10L)
+            	);
+
+            System.out.println("Success.  Table status: " + table.getTableDescription().toString());
+			LogWriter.writeLog("Table created : " + tableName);
+		} catch (Exception e) {
+			sucess = false;
+        	LogWriter.writeLog("Error creating table " + tableName);
+        	LogWriter.writeLog(e.toString());
+		}
+		return sucess;
+	}
+	
+	
+	
+	public boolean cargaDatosTablaMovies() throws Exception, IOException {
+		
+		boolean loadSucess = true;
+		
+		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
+	            .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:8000", "us-west-2"))
+	            .build();
+
+	        DynamoDB dynamoDB = new DynamoDB(client);
+
+	        Table table = dynamoDB.getTable("Movies");
+	        
+	        // File's path
+	        String path = System.getProperty("user.dir");
+	        JsonParser parser = new JsonFactory().createParser(new File(path + "\\data\\moviedata.json"));
+
+	        JsonNode rootNode = new ObjectMapper().readTree(parser);
+	        Iterator<JsonNode> iter = rootNode.iterator();
+
+	        ObjectNode currentNode;
+
+	        while (iter.hasNext()) {
+	            currentNode = (ObjectNode) iter.next();
+
+	            int year = currentNode.path("year").asInt();
+	            String title = currentNode.path("title").asText();
+
+	            try {
+	                table.putItem(new Item().withPrimaryKey("year", year, "title", title).withJSON("info",
+	                    currentNode.path("info").toString()));
+	                System.out.println("PutItem succeeded: " + year + " " + title);
+
+	            }
+	            catch (Exception e) {
+	                System.err.println("Unable to add movie: " + year + " " + title);
+	                System.err.println(e.getMessage());
+	                break;
+	            }
+	        }
+	        parser.close();
+        
+        return loadSucess;
+    }
 	
 	
 

@@ -48,6 +48,21 @@ public class AmazonDynamoDBSample {
     		
     		
     		
+    		/////////////////////////////////////
+    		////////// CREATE TABLE MOVIES
+    		/////////////////////////////////////
+    		//LogWriter.writeLog("Creating table Movies....");
+    		//dynamoDatabaseAccessImpl.createTableMovies("Movies");
+    		
+
+    		
+    		////////////////////////////////////////////////////////////////
+    		/// Insert values into Movies thru a Json file
+    		//////////////////////////////////////////////////
+    		LogWriter.writeLog("Loading data in table Movies....");    		
+    		dynamoDatabaseAccessImpl.cargaDatosTablaMovies();
+    		LogWriter.writeLog("Process end");
+    		
     		
     		
     		//////////////////////////////////
