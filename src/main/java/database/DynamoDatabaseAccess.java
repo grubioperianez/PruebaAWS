@@ -1,4 +1,4 @@
-package access;
+package database;
 
 public interface DynamoDatabaseAccess {
 	

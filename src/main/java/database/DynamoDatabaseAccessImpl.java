@@ -1,4 +1,4 @@
-package access;
+package database;
 
 
 import java.io.File;
@@ -30,13 +30,13 @@ import com.amazonaws.services.dynamodbv2.model.PutItemResult;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import database.dynamo.Constants;
+import constants.DynamoConstants;
+import constants.JsonConstants;
 import logs.LogWriter;
 
 public class DynamoDatabaseAccessImpl implements DynamoDatabaseAccess {
@@ -51,6 +51,7 @@ public class DynamoDatabaseAccessImpl implements DynamoDatabaseAccess {
 	public DynamoDatabaseAccessImpl() {		
 	}
 
+
 	@Override
 	public boolean initConnexion()  {
 		
@@ -63,7 +64,7 @@ public class DynamoDatabaseAccessImpl implements DynamoDatabaseAccess {
             credentialsProvider.getCredentials();
             
             dynamoDB = AmazonDynamoDBClientBuilder.standard()
-            		.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(Constants.LOCAL_HOST + ":" + Constants.DATABASE_PORT, Constants.DATABASE_REGION)).build();
+            		.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(DynamoConstants.LOCAL_HOST + ":" + DynamoConstants.DATABASE_PORT, DynamoConstants.DATABASE_REGION)).build();
         } catch (Exception e) {
         	connectSucess = false;
         	LogWriter.writeLog("Cannot load credentials from the credential profiles file, check the value elements un credentials file");
@@ -137,8 +138,8 @@ public class DynamoDatabaseAccessImpl implements DynamoDatabaseAccess {
 	        Table table = dynamoDB.getTable("Movies");
 	        
 	        // File's path
-	        String path = System.getProperty("user.dir");
-	        JsonParser parser = new JsonFactory().createParser(new File(path + "\\data\\moviedata.json"));
+	        String filePath = System.getProperty("user.dir") + JsonConstants.MOVIES_FILE_PATH + "\\" + JsonConstants.MOVIES_FILE_NAME;
+	        JsonParser parser = new JsonFactory().createParser(new File(filePath));
 
 	        JsonNode rootNode = new ObjectMapper().readTree(parser);
 	        Iterator<JsonNode> iter = rootNode.iterator();
@@ -152,8 +153,7 @@ public class DynamoDatabaseAccessImpl implements DynamoDatabaseAccess {
 	            String title = currentNode.path("title").asText();
 
 	            try {
-	                table.putItem(new Item().withPrimaryKey("year", year, "title", title).withJSON("info",
-	                    currentNode.path("info").toString()));
+	                table.putItem(new Item().withPrimaryKey("year", year, "title", title).withJSON("info", currentNode.path("info").toString()));
 	                System.out.println("PutItem succeeded: " + year + " " + title);
 
 	            }
@@ -213,7 +213,7 @@ public class DynamoDatabaseAccessImpl implements DynamoDatabaseAccess {
         return "Table Description: " + tableDescription;
 	}
 
-	@Override
+
 	/**
 	 * Inserts into Prueba001
 	 */

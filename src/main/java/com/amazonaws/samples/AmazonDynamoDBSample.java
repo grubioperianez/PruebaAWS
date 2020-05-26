@@ -1,5 +1,5 @@
 package com.amazonaws.samples;
-import access.DynamoDatabaseAccessImpl;
+import database.DynamoDatabaseAccessImpl;
 import logs.LogWriter;
 
 /**
@@ -11,6 +11,7 @@ public class AmazonDynamoDBSample {
     //static AmazonDynamoDB dynamoDB;
 
     public static void main(String[] args) throws Exception {
+    	
     	
     	LogWriter.writeLog("Class constructor");
     	DynamoDatabaseAccessImpl dynamoDatabaseAccessImpl = new DynamoDatabaseAccessImpl();
@@ -59,9 +60,9 @@ public class AmazonDynamoDBSample {
     		////////////////////////////////////////////////////////////////
     		/// Insert values into Movies thru a Json file
     		//////////////////////////////////////////////////
-    		LogWriter.writeLog("Loading data in table Movies....");    		
-    		dynamoDatabaseAccessImpl.cargaDatosTablaMovies();
-    		LogWriter.writeLog("Process end");
+    		//LogWriter.writeLog("Loading data in table Movies....");    		
+    		//dynamoDatabaseAccessImpl.cargaDatosTablaMovies();
+    		//LogWriter.writeLog("Process end");
     		
     		
     		
@@ -71,7 +72,7 @@ public class AmazonDynamoDBSample {
     		// dynamoDatabaseAccessImpl.deleteTable("Prueba003");
     		
     		
-    		LogWriter.writeLog(dynamoDatabaseAccessImpl.listTables());
+    		//LogWriter.writeLog(dynamoDatabaseAccessImpl.listTables());
     		
     	} else {
     		LogWriter.writeLog("Failure to initialice the database connection");
